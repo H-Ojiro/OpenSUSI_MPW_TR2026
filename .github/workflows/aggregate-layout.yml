@@ -82,6 +82,33 @@ jobs:
             --repo-name "${{ github.event.repository.name }}" \
             --branch "main"
 
+          mkdir -p work
+          python3 scripts/generate_users_markdown_table.py \
+            --manifest project/manifest.json \
+            --repo-owner "${{ github.repository_owner }}" \
+            --repo-name "${{ github.event.repository.name }}" \
+            --branch "main" > work/users_markdown_table.md
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          readme_path = Path("README.md")
+          readme = readme_path.read_text(encoding="utf-8")
+          svg_marker = "![MPW Layout](./USERS.svg)"
+          svg_end = readme.index(svg_marker) + len(svg_marker)
+          first_divider = readme.index("\n---", svg_end)
+          second_divider = readme.index("\n---", first_divider + 1)
+          table = Path("work/users_markdown_table.md").read_text(encoding="utf-8").rstrip()
+
+          readme = (
+              readme[:first_divider]
+              + "\n\n---\n"
+              + table
+              + readme[second_divider:]
+          )
+          readme_path.write_text(readme, encoding="utf-8")
+          PY
+
       - name: Commit and push with retry
         run: |
           set -euo pipefail
@@ -90,7 +117,7 @@ jobs:
           git config user.email "bot@opensusi.org"
 
           rebuild_outputs() {
-            mkdir -p project
+            mkdir -p project work
 
             python3 scripts/aggregate_submission.py \
               --info-yaml info.yaml \
@@ -108,12 +135,39 @@ jobs:
               --repo-owner "${{ github.repository_owner }}" \
               --repo-name "${{ github.event.repository.name }}" \
               --branch "main"
+
+            python3 scripts/generate_users_markdown_table.py \
+              --manifest project/manifest.json \
+              --repo-owner "${{ github.repository_owner }}" \
+              --repo-name "${{ github.event.repository.name }}" \
+              --branch "main" > work/users_markdown_table.md
+
+            python3 - <<'PY'
+          from pathlib import Path
+
+          readme_path = Path("README.md")
+          readme = readme_path.read_text(encoding="utf-8")
+          svg_marker = "![MPW Layout](./USERS.svg)"
+          svg_end = readme.index(svg_marker) + len(svg_marker)
+          first_divider = readme.index("\n---", svg_end)
+          second_divider = readme.index("\n---", first_divider + 1)
+          table = Path("work/users_markdown_table.md").read_text(encoding="utf-8").rstrip()
+
+          readme = (
+              readme[:first_divider]
+              + "\n\n---\n"
+              + table
+              + readme[second_divider:]
+          )
+          readme_path.write_text(readme, encoding="utf-8")
+          PY
           }
 
           stage_outputs() {
             git add -f project/manifest.json
             git add -f USERS.md
             git add -f USERS.svg
+            git add -f README.md
           }
 
           stage_outputs
