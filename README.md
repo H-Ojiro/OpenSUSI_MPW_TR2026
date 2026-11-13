@@ -11,6 +11,7 @@ Click each tile to open the corresponding Tapeout directory.
 
 ![MPW Layout](./USERS.svg)
 
+
 ---
 <table>
   <thead>
@@ -117,7 +118,6 @@ Click each tile to open the corresponding Tapeout directory.
     </tr>
   </tbody>
 </table>
-
 ---
 
 ### Users List
