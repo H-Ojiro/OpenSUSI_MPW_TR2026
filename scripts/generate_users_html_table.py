@@ -98,6 +98,11 @@ def entry_display_label(entry: dict[str, Any]) -> str:
     return entry.get("githubId", "-")
 
 
+def wrap_long_text(value: str) -> str:
+    """Wrap long identifiers to fit smaller cells without changing link behavior."""
+    return html.escape(value, quote=True).replace("_", "_<wbr>")
+
+
 def generate_html_table(
     manifest: dict[str, Any],
     repo_owner: str,
@@ -117,25 +122,29 @@ def generate_html_table(
             continue
         by_tile[(col, row)] = entry
 
-    lines = ["<table>", "  <thead>", "    <tr>", "      <th></th>"]
+    lines = [
+        '<table style="width: 100%; table-layout: fixed; border-collapse: collapse;">',
+        "  <thead>",
+        "    <tr>",
+        '      <th style="width: 44px;">&nbsp;</th>',
+    ]
     for col in range(grid_x):
-        lines.append(f"      <th>{col}</th>")
+        lines.append(f'      <th style="width: {100 / grid_x:.2f}%; text-align: center;">{col}</th>')
     lines.extend(["    </tr>", "  </thead>", "  <tbody>"])
 
     for row in range(grid_y):
         lines.extend(
             [
                 "    <tr>",
-                f'      <th scope="row">{row}</th>',
+                f'      <th scope="row" style="width: 44px; text-align: center;">{row}</th>',
             ]
         )
         for col in range(grid_x):
             entry = by_tile.get((col, row))
             if entry is None:
-                lines.append("      <td></td>")
+                lines.append('      <td style="padding: 4px; min-width: 90px; height: 90px; vertical-align: top; text-align: center;">&nbsp;</td>')
                 continue
 
-            entry_type = entry.get("type", "")
             label = entry_display_label(entry)
             top_cell = normalize_string(entry.get("gdsTopCell")) or "-"
             run_id = normalize_string(entry.get("sourceRunId")) or "-"
@@ -144,11 +153,16 @@ def generate_html_table(
                 repo_tree_url(entry, repo_owner, repo_name, branch), quote=True
             )
             cell_text = "<br>".join(
-                html.escape(value, quote=True)
-                for value in (label, top_cell, f"Run: {run_id}", tile_text)
+                (
+                    f"<strong>{wrap_long_text(str(label))}</strong>",
+                    f"<small>{wrap_long_text(top_cell)}</small>",
+                    f"<small>Run: {wrap_long_text(run_id)}</small>",
+                    f"<small>{tile_text}</small>",
+                )
             )
             lines.append(
-                f'      <td><strong><a href="{url}">{cell_text}</a></strong></td>'
+                f'      <td style="padding: 6px; min-width: 90px; height: 90px; vertical-align: top; text-align: center;">'
+                f'<a href="{url}" style="display: block; color: inherit; text-decoration: none;">{cell_text}</a></td>'
             )
         lines.append("    </tr>")
 
