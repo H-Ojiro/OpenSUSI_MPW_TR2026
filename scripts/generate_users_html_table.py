@@ -135,12 +135,20 @@ def generate_html_table(
                 lines.append("      <td></td>")
                 continue
 
-            label = html.escape(str(entry_display_label(entry)), quote=True)
+            entry_type = entry.get("type", "")
+            label = entry_display_label(entry)
+            top_cell = normalize_string(entry.get("gdsTopCell")) or "-"
+            run_id = normalize_string(entry.get("sourceRunId")) or "-"
+            tile_text = f"Tile: ({col},{row})"
             url = html.escape(
                 repo_tree_url(entry, repo_owner, repo_name, branch), quote=True
             )
+            cell_text = "<br>".join(
+                html.escape(value, quote=True)
+                for value in (label, top_cell, f"Run: {run_id}", tile_text)
+            )
             lines.append(
-                f'      <td><strong><a href="{url}">{label}</a></strong></td>'
+                f'      <td><strong><a href="{url}">{cell_text}</a></strong></td>'
             )
         lines.append("    </tr>")
 
