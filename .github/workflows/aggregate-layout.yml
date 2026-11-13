@@ -83,11 +83,11 @@ jobs:
             --branch "main"
 
           mkdir -p work
-          python3 scripts/generate_users_markdown_table.py \
+          python3 scripts/generate_users_html_table.py \
             --manifest project/manifest.json \
             --repo-owner "${{ github.repository_owner }}" \
             --repo-name "${{ github.event.repository.name }}" \
-            --branch "main" > work/users_markdown_table.md
+            --branch "main" > work/users_html_table.html
 
           python3 - <<'PY'
           from pathlib import Path
@@ -98,7 +98,7 @@ jobs:
           svg_end = readme.index(svg_marker) + len(svg_marker)
           first_divider = readme.index("\n---", svg_end)
           second_divider = readme.index("\n---", first_divider + 1)
-          table = Path("work/users_markdown_table.md").read_text(encoding="utf-8").rstrip()
+          table = Path("work/users_html_table.html").read_text(encoding="utf-8").rstrip()
 
           readme = (
               readme[:first_divider]
@@ -136,11 +136,11 @@ jobs:
               --repo-name "${{ github.event.repository.name }}" \
               --branch "main"
 
-            python3 scripts/generate_users_markdown_table.py \
+            python3 scripts/generate_users_html_table.py \
               --manifest project/manifest.json \
               --repo-owner "${{ github.repository_owner }}" \
               --repo-name "${{ github.event.repository.name }}" \
-              --branch "main" > work/users_markdown_table.md
+              --branch "main" > work/users_html_table.html
 
             python3 - <<'PY'
           from pathlib import Path
@@ -151,7 +151,7 @@ jobs:
           svg_end = readme.index(svg_marker) + len(svg_marker)
           first_divider = readme.index("\n---", svg_end)
           second_divider = readme.index("\n---", first_divider + 1)
-          table = Path("work/users_markdown_table.md").read_text(encoding="utf-8").rstrip()
+          table = Path("work/users_html_table.html").read_text(encoding="utf-8").rstrip()
 
           readme = (
               readme[:first_divider]
