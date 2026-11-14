@@ -1,8 +1,8 @@
-# ----- ------ ----- ----- ------ ----- ----- ------ -----
+# ----- ------ ----- ----- ------ ----- ----- -----
 # OpenSUSI jun1okamura <jun1okamura@gmail.com>
 # LICENSE: Apache License Version 2.0, January 2004,
 #          http://www.apache.org/licenses/
-# ----- ------ ----- ----- ------ ----- ----- ------ -----
+# ----- ------ ----- ----- ------ ----- ----- -----
 name: Aggregate Layout
 
 concurrency:
@@ -82,6 +82,10 @@ jobs:
             --repo-name "${{ github.event.repository.name }}" \
             --branch "main"
 
+          python3 scripts/generate_tile_previews.py \
+            --manifest project/manifest.json \
+            --output-dir tile-previews
+
           mkdir -p work
           python3 scripts/generate_users_html_table.py \
             --manifest project/manifest.json \
@@ -136,6 +140,10 @@ jobs:
               --repo-name "${{ github.event.repository.name }}" \
               --branch "main"
 
+            python3 scripts/generate_tile_previews.py \
+              --manifest project/manifest.json \
+              --output-dir tile-previews
+
             python3 scripts/generate_users_html_table.py \
               --manifest project/manifest.json \
               --repo-owner "${{ github.repository_owner }}" \
@@ -168,6 +176,7 @@ jobs:
             git add -f USERS.md
             git add -f USERS.svg
             git add -f README.md
+            git add -f tile-previews/
           }
 
           stage_outputs
