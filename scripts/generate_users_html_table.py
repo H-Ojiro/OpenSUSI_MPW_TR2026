@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# ----- ------ ----- ----- ------ ----- ----- ------ -----
+# ----- ------ ----- ----- ------ ----- ----- -----
 # OpenSUSI - HTML Table Generator from Manifest
 # LICENSE: Apache License Version 2.0
-# ----- ------ ----- ----- ------ ----- ----- ------ -----
+# ----- ------ ----- ----- ------ ----- ----- -----
 import argparse
 import html
 import json
@@ -89,18 +89,26 @@ def repo_tree_url(
     return f"https://github.com/{repo_owner}/{repo_name}/tree/{branch}/{rel}"
 
 
+def tile_preview_url(
+    col: int,
+    row: int,
+    repo_owner: str,
+    repo_name: str,
+    branch: str,
+) -> str:
+    return (
+        f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch}/"
+        f"tile-previews/tile-{col}-{row}/tile-preview.svg"
+    )
+
+
 def entry_display_label(entry: dict[str, Any]) -> str:
     entry_type = entry.get("type", "")
     if entry_type == "teg":
         return "TEG"
     if entry_type == "fill":
         return "EMPTY"
-    return entry.get("githubId", "-")
-
-
-def wrap_long_text(value: str) -> str:
-    """Wrap long identifiers to fit smaller cells without changing link behavior."""
-    return html.escape(value, quote=True).replace("_", "_<wbr>")
+    return str(entry.get("githubId", "-"))
 
 
 def generate_html_table(
@@ -129,7 +137,9 @@ def generate_html_table(
         '      <th style="width: 44px;">&nbsp;</th>',
     ]
     for col in range(grid_x):
-        lines.append(f'      <th style="width: {100 / grid_x:.2f}%; text-align: center;">{col}</th>')
+        lines.append(
+            f'      <th style="width: {100 / grid_x:.2f}%; text-align: center;">{col}</th>'
+        )
     lines.extend(["    </tr>", "  </thead>", "  <tbody>"])
 
     for row in range(grid_y):
@@ -139,31 +149,46 @@ def generate_html_table(
                 f'      <th scope="row" style="width: 44px; text-align: center;">{row}</th>',
             ]
         )
+
         for col in range(grid_x):
             entry = by_tile.get((col, row))
             if entry is None:
-                lines.append('      <td style="padding: 4px; min-width: 90px; height: 90px; vertical-align: top; text-align: center;">&nbsp;</td>')
+                lines.append(
+                    '      <td style="padding: 4px; min-width: 90px; '
+                    'height: 90px; vertical-align: top; text-align: center;">&nbsp;</td>'
+                )
                 continue
 
             label = entry_display_label(entry)
             top_cell = normalize_string(entry.get("gdsTopCell")) or "-"
-            run_id = normalize_string(entry.get("sourceRunId")) or "-"
-            tile_text = f"Tile: ({col},{row})"
-            url = html.escape(
-                repo_tree_url(entry, repo_owner, repo_name, branch), quote=True
+            alt_text = html.escape(
+                f"Tile ({col},{row}): {label}; top cell {top_cell}",
+                quote=True,
             )
-            cell_text = "<br>".join(
-                (
-                    f"<strong>{wrap_long_text(str(label))}</strong>",
-                    f"<small>{wrap_long_text(top_cell)}</small>",
-                    f"<small>Run: {wrap_long_text(run_id)}</small>",
-                    f"<small>{tile_text}</small>",
-                )
+            title = html.escape(
+                f"Tile ({col},{row}): {label} — {top_cell}",
+                quote=True,
             )
+            href = html.escape(
+                repo_tree_url(entry, repo_owner, repo_name, branch),
+                quote=True,
+            )
+            image_url = html.escape(
+                tile_preview_url(col, row, repo_owner, repo_name, branch),
+                quote=True,
+            )
+
             lines.append(
-                f'      <td style="padding: 6px; min-width: 90px; height: 90px; vertical-align: top; text-align: center;">'
-                f'<a href="{url}" style="display: block; color: inherit; text-decoration: none;">{cell_text}</a></td>'
+                '      <td style="padding: 4px; min-width: 90px; '
+                'text-align: center;">'
+                f'<a href="{href}" title="{title}" '
+                'style="display: block; color: inherit; text-decoration: none;">'
+                f'<img src="{image_url}" alt="{alt_text}" title="{title}" '
+                'style="display: block; width: 100%; max-height: 120px; '
+                'object-fit: contain; margin: 0 auto;">'
+                "</a></td>"
             )
+
         lines.append("    </tr>")
 
     lines.extend(["  </tbody>", "</table>"])
