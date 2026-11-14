@@ -11,7 +11,7 @@ Click each tile to open the corresponding Tapeout directory.
 
 ![MPW Layout](./USERS.svg)
 
-
+[View USERS.svg directly](https://raw.githubusercontent.com/H-Ojiro/OpenSUSI_MPW_TR2026/main/USERS.svg)
 
 ---
 <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
