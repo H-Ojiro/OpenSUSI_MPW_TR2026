@@ -11,6 +11,8 @@ Click each tile to open the corresponding Tapeout directory.
 
 ![MPW Layout](./USERS.svg)
 
+![MPW Layout Preview](./PREVIEW.svg)
+
 [View USERS.svg directly](https://raw.githubusercontent.com/H-Ojiro/OpenSUSI_MPW_TR2026/main/USERS.svg)
 
 ---
