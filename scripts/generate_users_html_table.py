@@ -10,6 +10,7 @@ import os
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 DEFAULT_MANIFEST = Path("project/manifest.json")
 
@@ -77,6 +78,12 @@ def repo_tree_url(
     repo_name: str,
     branch: str,
 ) -> str:
+    source_repo = normalize_string(entry.get("sourceRepo"))
+    source_repo_parts = source_repo.split("/")
+    if len(source_repo_parts) == 2 and all(source_repo_parts):
+        owner, name = (quote(part, safe="") for part in source_repo_parts)
+        return f"https://github.com/{owner}/{name}"
+
     entry_type = entry.get("type", "")
     github_id = entry.get("githubId", "-")
 
