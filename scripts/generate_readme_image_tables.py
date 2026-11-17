@@ -93,7 +93,7 @@ def generate_table(source, kind, manifest, assets, owner, repo, branch, site_dir
             image = f'<img src="{image_url}" width="{width}" height="{height}" alt="{alt}" style="display: block; margin: 0; padding: 0; vertical-align: top;">'
             entry = entries.get((col, row))
             if entry:
-                url = escape(repo_tree_url(entry, owner, repo, branch), quote=True)
+                url = escape(repo_tree_url(entry, owner, repo, branch, prefer_source_repo=(kind == "preview")), quote=True)
                 image = f'<a href="{url}" style="display: block; margin: 0; padding: 0; line-height: 0;">{image}</a>'
             lines.append(f'      <td align="center" valign="top" style="border: 1px solid #555; padding: 0; font-size: 0; line-height: 0; vertical-align: top;">{image}</td>')
         lines.append('    </tr>')
@@ -129,7 +129,7 @@ def main():
                                          '<h2>' + escape(t.splitlines()[0][4:]) + '</h2>', 1)
                                   for t in tables) + '</body></html>')
     (args.site_dir / 'index.html').write_text(page, encoding='utf-8')
-    section = START + '\n\nClick a tile to open its project repository or submission directory.\n\n' + '\n\n'.join(tables) + '\n\n' + END
+    section = START + '\n\nClick an information tile to open its submission directory in this repository. Click a layout snapshot to open its source repository.\n\n' + '\n\n'.join(tables) + '\n\n' + END
     readme = args.readme.read_text()
     if START in readme:
         start, end = readme.index(START), readme.index(END) + len(END)
