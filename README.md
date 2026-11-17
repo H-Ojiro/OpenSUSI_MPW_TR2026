@@ -7,9 +7,8 @@ Below is the current user layout of the MPW shuttle.
 
 <!-- BEGIN MPW IMAGE TABLES -->
 
-Click an information tile to open its submission directory in this repository. Click a layout snapshot to open its source repository.
-
 ### OpenSUSI MPW Users Layout
+Click an information tile to open its submission directory in this repository.
 
 <table border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse; border-spacing: 0;">
   <thead><tr><th style="border: 1px solid #555; padding: 0;"></th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">0</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">1</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">2</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">3</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">4</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">5</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">6</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">7</th></tr></thead>
@@ -98,6 +97,7 @@ Click an information tile to open its submission directory in this repository. C
 </table>
 
 ### OpenSUSI MPW Layout Preview (Layer 20/0)
+Click a layout snapshot to open its source repository.
 
 <table border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse; border-spacing: 0;">
   <thead><tr><th style="border: 1px solid #555; padding: 0;"></th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">0</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">1</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">2</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">3</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">4</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">5</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">6</th><th scope="col" align="center" style="border: 1px solid #555; padding: 0;">7</th></tr></thead>
