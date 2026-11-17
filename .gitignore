@@ -3,3 +3,7 @@ users/
 project/
 __pycache__/
 *.pyc
+
+# Workflow-generated Pages assets
+_site/
+images/mpw/

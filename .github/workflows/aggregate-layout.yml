@@ -6,7 +6,7 @@
 name: Aggregate Layout
 
 concurrency:
-  group: opensusi-aggregate-main
+  group: opensusi-aggregate-pages
   cancel-in-progress: false
 
 on:
@@ -24,25 +24,33 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  TARGET_BRANCH: ${{ github.ref_name }}
 
 jobs:
   aggregate:
+    if: github.ref_type == 'branch'
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
+      pages: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - name: Sync main
+      - name: Sync selected branch
         run: |
           set -euo pipefail
-          git pull --rebase origin main
+          git pull --rebase origin "$TARGET_BRANCH"
+
+      - name: Configure GitHub Pages
+        if: github.repository == 'OpenSUSI/OpenSUSI_MPW_TR2026'
+        id: pages
+        uses: actions/configure-pages@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -76,48 +84,20 @@ jobs:
             --output USERS.svg \
             --repo-owner "${{ github.repository_owner }}" \
             --repo-name "${{ github.event.repository.name }}" \
-            --branch "main"
+            --branch "$TARGET_BRANCH"
           python3 scripts/generate_preview_svg.py \
             --manifest project/manifest.json \
             --output PREVIEW.svg \
             --repo-owner "${{ github.repository_owner }}" \
             --repo-name "${{ github.event.repository.name }}" \
-            --branch "main" \
-            --update-readme
+            --branch "$TARGET_BRANCH"
           mkdir -p work
-          python3 scripts/generate_users_html_table.py \
+          python3 scripts/generate_readme_image_tables.py \
             --manifest project/manifest.json \
             --repo-owner "${{ github.repository_owner }}" \
             --repo-name "${{ github.event.repository.name }}" \
-            --branch "main" > work/users_html_table.html
-          python3 - <<'PY'
-          from pathlib import Path
-
-          readme_path = Path("README.md")
-          readme = readme_path.read_text(encoding="utf-8")
-          svg_marker = "![MPW Layout](./USERS.svg)"
-          direct_link = (
-              "[View USERS.svg directly](https://raw.githubusercontent.com/"
-              "H-Ojiro/OpenSUSI_MPW_TR2026/main/USERS.svg)"
-          )
-          svg_end = readme.index(svg_marker) + len(svg_marker)
-          first_divider = readme.index("\n---", svg_end)
-          second_divider = readme.index("\n---", first_divider + 1)
-          table = Path("work/users_html_table.html").read_text(encoding="utf-8").rstrip()
-
-          section = readme[svg_end:first_divider]
-          if direct_link not in section:
-              section = section.rstrip() + "\n\n" + direct_link + "\n"
-
-          readme = (
-              readme[:svg_end]
-              + section
-              + "\n---\n"
-              + table
-              + readme[second_divider:]
-          )
-          readme_path.write_text(readme, encoding="utf-8")
-          PY
+            --branch "$TARGET_BRANCH" \
+            --image-base-url "${{ steps.pages.outputs.base_url || 'https://opensusi.github.io/OpenSUSI_MPW_TR2026' }}"
 
       - name: Commit and push with retry
         run: |
@@ -140,54 +120,24 @@ jobs:
               --output USERS.svg \
               --repo-owner "${{ github.repository_owner }}" \
               --repo-name "${{ github.event.repository.name }}" \
-              --branch "main"
+              --branch "$TARGET_BRANCH"
             python3 scripts/generate_preview_svg.py \
               --manifest project/manifest.json \
               --output PREVIEW.svg \
               --repo-owner "${{ github.repository_owner }}" \
               --repo-name "${{ github.event.repository.name }}" \
-              --branch "main" \
-              --update-readme
-            python3 scripts/generate_users_html_table.py \
+              --branch "$TARGET_BRANCH"
+            python3 scripts/generate_readme_image_tables.py \
               --manifest project/manifest.json \
               --repo-owner "${{ github.repository_owner }}" \
               --repo-name "${{ github.event.repository.name }}" \
-              --branch "main" > work/users_html_table.html
-            python3 - <<'PY'
-          from pathlib import Path
-
-          readme_path = Path("README.md")
-          readme = readme_path.read_text(encoding="utf-8")
-          svg_marker = "![MPW Layout](./USERS.svg)"
-          direct_link = (
-              "[View USERS.svg directly](https://raw.githubusercontent.com/"
-              "H-Ojiro/OpenSUSI_MPW_TR2026/main/USERS.svg)"
-          )
-          svg_end = readme.index(svg_marker) + len(svg_marker)
-          first_divider = readme.index("\n---", svg_end)
-          second_divider = readme.index("\n---", first_divider + 1)
-          table = Path("work/users_html_table.html").read_text(encoding="utf-8").rstrip()
-
-          section = readme[svg_end:first_divider]
-          if direct_link not in section:
-              section = section.rstrip() + "\n\n" + direct_link + "\n"
-
-          readme = (
-              readme[:svg_end]
-              + section
-              + "\n---\n"
-              + table
-              + readme[second_divider:]
-          )
-          readme_path.write_text(readme, encoding="utf-8")
-          PY
+              --branch "$TARGET_BRANCH" \
+              --image-base-url "${{ steps.pages.outputs.base_url || 'https://opensusi.github.io/OpenSUSI_MPW_TR2026' }}"
           }
 
           stage_outputs() {
             git add -f project/manifest.json
             git add -f USERS.md
-            git add -f USERS.svg
-            git add -f PREVIEW.svg
             git add -f README.md
           }
 
@@ -199,14 +149,14 @@ jobs:
             push_succeeded=false
             for attempt in 1 2 3 4 5; do
               echo "Push attempt ${attempt}"
-              if git push origin HEAD:main; then
+              if git push origin "HEAD:refs/heads/$TARGET_BRANCH"; then
                 echo "Push succeeded"
                 push_succeeded=true
                 break
               fi
-              echo "Push failed. Remote main was updated. Re-sync and rebuild."
-              git fetch origin main
-              git reset --hard origin/main
+              echo "Push failed. Re-sync ${TARGET_BRANCH} and rebuild."
+              git fetch origin "$TARGET_BRANCH"
+              git reset --hard "origin/$TARGET_BRANCH"
               rebuild_outputs
               stage_outputs
               if git diff --cached --quiet; then
@@ -224,6 +174,7 @@ jobs:
           fi
 
       - name: Publish aggregate GDS
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: aggregate-current
@@ -247,3 +198,24 @@ jobs:
               --notes "Automatically generated aggregate GDS for the current OpenSUSI TR-1um MPW submission." \
               --latest
           fi
+
+      - name: Upload generated images and layout page
+        if: github.repository == 'OpenSUSI/OpenSUSI_MPW_TR2026'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy-pages:
+    if: github.repository == 'OpenSUSI/OpenSUSI_MPW_TR2026'
+    needs: aggregate
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy generated images to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
