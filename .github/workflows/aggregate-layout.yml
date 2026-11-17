@@ -6,7 +6,7 @@
 name: Aggregate Layout
 
 concurrency:
-  group: opensusi-aggregate-main
+  group: opensusi-aggregate-pages
   cancel-in-progress: false
 
 on:
@@ -24,25 +24,33 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  TARGET_BRANCH: ${{ github.ref_name }}
 
 jobs:
   aggregate:
+    if: github.ref_type == 'branch'
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
+      pages: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      - name: Sync main
+      - name: Sync selected branch
         run: |
           set -euo pipefail
-          git pull --rebase origin main
+          git pull --rebase origin "$TARGET_BRANCH"
+
+      - name: Configure GitHub Pages
+        if: github.repository == 'OpenSUSI/OpenSUSI_MPW_TR2026'
+        id: pages
+        uses: actions/configure-pages@v5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -53,14 +61,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pip install --upgrade pip
-          python3 -m pip install pyyaml klayout
+          python3 -m pip install pyyaml klayout pillow
 
       - name: Aggregate
         run: |
           set -euo pipefail
-
           mkdir -p project
-
           python3 scripts/aggregate_submission.py \
             --info-yaml info.yaml \
             --users-dir users \
@@ -70,88 +76,97 @@ jobs:
       - name: Generate views
         run: |
           set -euo pipefail
-
           python3 scripts/generate_users_md.py \
             --manifest project/manifest.json \
             --output USERS.md
-
           python3 scripts/generate_users_svg.py \
             --manifest project/manifest.json \
             --output USERS.svg \
             --repo-owner "${{ github.repository_owner }}" \
             --repo-name "${{ github.event.repository.name }}" \
-            --branch "main"
+            --branch "$TARGET_BRANCH"
+          python3 scripts/generate_preview_svg.py \
+            --manifest project/manifest.json \
+            --output PREVIEW.svg \
+            --repo-owner "${{ github.repository_owner }}" \
+            --repo-name "${{ github.event.repository.name }}" \
+            --branch "$TARGET_BRANCH"
+          mkdir -p work
+          python3 scripts/generate_readme_image_tables.py \
+            --manifest project/manifest.json \
+            --repo-owner "${{ github.repository_owner }}" \
+            --repo-name "${{ github.event.repository.name }}" \
+            --branch "$TARGET_BRANCH" \
+            --image-base-url "${{ steps.pages.outputs.base_url || 'https://opensusi.github.io/OpenSUSI_MPW_TR2026' }}"
 
       - name: Commit and push with retry
         run: |
           set -euo pipefail
-
           git config user.name "opensusi-bot"
           git config user.email "bot@opensusi.org"
 
           rebuild_outputs() {
-            mkdir -p project
-
+            mkdir -p project work
             python3 scripts/aggregate_submission.py \
               --info-yaml info.yaml \
               --users-dir users \
               --output-gds project/ALL_GDSII_MDP.gds \
               --output-manifest project/manifest.json
-
             python3 scripts/generate_users_md.py \
               --manifest project/manifest.json \
               --output USERS.md
-
             python3 scripts/generate_users_svg.py \
               --manifest project/manifest.json \
               --output USERS.svg \
               --repo-owner "${{ github.repository_owner }}" \
               --repo-name "${{ github.event.repository.name }}" \
-              --branch "main"
+              --branch "$TARGET_BRANCH"
+            python3 scripts/generate_preview_svg.py \
+              --manifest project/manifest.json \
+              --output PREVIEW.svg \
+              --repo-owner "${{ github.repository_owner }}" \
+              --repo-name "${{ github.event.repository.name }}" \
+              --branch "$TARGET_BRANCH"
+            python3 scripts/generate_readme_image_tables.py \
+              --manifest project/manifest.json \
+              --repo-owner "${{ github.repository_owner }}" \
+              --repo-name "${{ github.event.repository.name }}" \
+              --branch "$TARGET_BRANCH" \
+              --image-base-url "${{ steps.pages.outputs.base_url || 'https://opensusi.github.io/OpenSUSI_MPW_TR2026' }}"
           }
 
           stage_outputs() {
             git add -f project/manifest.json
             git add -f USERS.md
-            git add -f USERS.svg
+            git add -f README.md
           }
 
           stage_outputs
-
           if git diff --cached --quiet; then
             echo "No repository files changed"
           else
             git commit -m "Update aggregated layout"
-
             push_succeeded=false
-
             for attempt in 1 2 3 4 5; do
               echo "Push attempt ${attempt}"
-
-              if git push origin HEAD:main; then
+              if git push origin "HEAD:refs/heads/$TARGET_BRANCH"; then
                 echo "Push succeeded"
                 push_succeeded=true
                 break
               fi
-
-              echo "Push failed. Remote main was updated. Re-sync and rebuild."
-
-              git fetch origin main
-              git reset --hard origin/main
-
+              echo "Push failed. Re-sync ${TARGET_BRANCH} and rebuild."
+              git fetch origin "$TARGET_BRANCH"
+              git reset --hard "origin/$TARGET_BRANCH"
               rebuild_outputs
               stage_outputs
-
               if git diff --cached --quiet; then
                 echo "No changes after re-sync"
                 push_succeeded=true
                 break
               fi
-
               git commit -m "Update aggregated layout"
               sleep $((attempt * 3))
             done
-
             if [[ "$push_succeeded" != true ]]; then
               echo "Failed to push after retries"
               exit 1
@@ -159,29 +174,23 @@ jobs:
           fi
 
       - name: Publish aggregate GDS
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: aggregate-current
           GDS_FILE: project/ALL_GDSII_MDP.gds
         run: |
           set -euo pipefail
-
           if [[ ! -s "$GDS_FILE" ]]; then
             echo "ERROR: Aggregate GDS does not exist or is empty"
             exit 1
           fi
-
           ls -lh "$GDS_FILE"
-
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             echo "Updating existing aggregate release"
-
-            gh release upload "$RELEASE_TAG" \
-              "$GDS_FILE" \
-              --clobber
+            gh release upload "$RELEASE_TAG" "$GDS_FILE" --clobber
           else
             echo "Creating aggregate release"
-
             gh release create "$RELEASE_TAG" \
               "$GDS_FILE" \
               --target main \
@@ -189,3 +198,24 @@ jobs:
               --notes "Automatically generated aggregate GDS for the current OpenSUSI TR-1um MPW submission." \
               --latest
           fi
+
+      - name: Upload generated images and layout page
+        if: github.repository == 'OpenSUSI/OpenSUSI_MPW_TR2026'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy-pages:
+    if: github.repository == 'OpenSUSI/OpenSUSI_MPW_TR2026'
+    needs: aggregate
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy generated images to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
