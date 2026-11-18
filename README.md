@@ -189,7 +189,9 @@ Click a layout snapshot to open its source repository.
 
 ### Open Interactive view
 
-👉 [Full-Size Interactive MPW Layout on GitHub Pages.](https://opensusi.github.io/OpenSUSI_MPW_TR2026)
+View Full-Size Interactive MPW Layout on GitHub Page.
+
+👉 [https://opensusi.github.io/OpenSUSI_MPW_TR2026/](https://opensusi.github.io/OpenSUSI_MPW_TR2026/)
 
 ---
 
