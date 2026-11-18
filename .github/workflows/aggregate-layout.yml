@@ -14,6 +14,7 @@ on:
   push:
     branches:
       - main
+      - reticle-link
     paths:
       - "users/**"
       - "info.yaml"
@@ -98,6 +99,7 @@ jobs:
             --repo-name "${{ github.event.repository.name }}" \
             --branch "$TARGET_BRANCH" \
             --image-base-url "${{ steps.pages.outputs.base_url || 'https://opensusi.github.io/OpenSUSI_MPW_TR2026' }}"
+          cp _site/index.html index.html
 
       - name: Commit and push with retry
         run: |
@@ -133,12 +135,14 @@ jobs:
               --repo-name "${{ github.event.repository.name }}" \
               --branch "$TARGET_BRANCH" \
               --image-base-url "${{ steps.pages.outputs.base_url || 'https://opensusi.github.io/OpenSUSI_MPW_TR2026' }}"
+            cp _site/index.html index.html
           }
 
           stage_outputs() {
             git add -f project/manifest.json
             git add -f USERS.md
             git add -f README.md
+            git add -f index.html
           }
 
           stage_outputs
