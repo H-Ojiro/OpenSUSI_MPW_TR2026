@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenSUSI MPW Users Layout</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             background-color: #0d1117;
             color: #c9d1d9;
@@ -11,29 +15,40 @@
             margin: 0;
             padding: 20px;
         }
-        table {
-            border-collapse: collapse; /* Removes spacing between cells */
-            border-spacing: 0;
+        h1, p {
+            margin-left: 10px;
         }
-        td, th {
-            padding: 0; /* Zeroes out default browser cell margins */
-            margin: 0;
-            border: 1px solid #30363d;
+        /* Force zero spacing on the table container and cells */
+        table.layout-grid {
+            border-collapse: collapse !important;
+            border-spacing: 0 !important;
+            border: none !important;
+            background-color: #0d1117;
+            margin: 10px 0;
         }
-        img {
+        table.layout-grid th, 
+        table.layout-grid td {
+            padding: 0 !important;
+            margin: 0 !important;
+            border: 1px solid #30363d !important;
+            background-color: #161b22;
+            line-height: 0;
+        }
+        table.layout-grid img {
             display: block;
             width: 140px;
             height: 90px;
+            border: none;
         }
     </style>
 </head>
 <body>
     <h1>OpenSUSI MPW Users Layout</h1>
     <p>Click an information tile to open its submission directory in this repository.</p>
-    
-    <!-- Your table structure here -->
-    <table>
-        <!-- rows and cells containing your SVGs -->
+
+    <!-- Ensure your table has the class="layout-grid" -->
+    <table class="layout-grid">
+        <!-- Paste your rows and cells here -->
     </table>
 </body>
 </html>
