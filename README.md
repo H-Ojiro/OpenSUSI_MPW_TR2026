@@ -186,6 +186,13 @@ Click a layout snapshot to open its source repository.
 </table>
 
 <!-- END MPW IMAGE TABLES -->
+
+### Open Interactive view
+
+View Full-Size Interactive MPW Layout on GitHub Page.
+
+👉 [https://opensusi.github.io/OpenSUSI_MPW_TR2026/](https://opensusi.github.io/OpenSUSI_MPW_TR2026/)
+
 ---
 
 ### Users List
