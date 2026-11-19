@@ -129,7 +129,7 @@ def main():
                                          '<h2>' + escape(t.splitlines()[0][4:]) + '</h2>', 1)
                                   for t in tables) + '</body></html>')
     (args.site_dir / 'index.html').write_text(page, encoding='utf-8')
-    section = START + '\n\nClick an information tile to open its submission directory in this repository. Click a layout snapshot to open its source repository.\n\n' + '\n\n'.join(tables) + '\n\n' + END
+    section = START + '\n\n- Click an information tile to open its submission directory in this repository.\n- Click a layout snapshot to open its source repository.\n\n' + '\n\n'.join(tables) + '\n\n' + END
     readme = args.readme.read_text()
     if START in readme:
         start, end = readme.index(START), readme.index(END) + len(END)
