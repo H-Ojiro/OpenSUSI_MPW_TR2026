@@ -7,7 +7,8 @@ Below is the current user layout of the MPW shuttle.
 
 <!-- BEGIN MPW IMAGE TABLES -->
 
-Click an information tile to open its submission directory in this repository. Click a layout snapshot to open its source repository.
+- Click an information tile to open its submission directory in this repository.
+- Click a layout snapshot to open its source repository.
 
 ### OpenSUSI MPW Users Layout
 
