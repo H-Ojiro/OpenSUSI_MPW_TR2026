@@ -24,5 +24,3 @@ Detailed table view:
 ---
 
 ## 📂 Repository Structure
-
-```
