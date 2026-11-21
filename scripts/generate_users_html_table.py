@@ -77,10 +77,12 @@ def repo_tree_url(
     repo_owner: str,
     repo_name: str,
     branch: str,
+    *,
+    prefer_source_repo: bool = True,
 ) -> str:
     source_repo = normalize_string(entry.get("sourceRepo"))
     source_repo_parts = source_repo.split("/")
-    if len(source_repo_parts) == 2 and all(source_repo_parts):
+    if prefer_source_repo and len(source_repo_parts) == 2 and all(source_repo_parts):
         owner, name = (quote(part, safe="") for part in source_repo_parts)
         return f"https://github.com/{owner}/{name}"
 
