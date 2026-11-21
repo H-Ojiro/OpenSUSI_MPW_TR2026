@@ -11,7 +11,7 @@ text { font-family: Arial, sans-serif; fill: black; }
 .tile-sub { font-size: 11px; }
 .tile-run { font-size: 10px; }
 </style>
-<text class="title" x="30" y="30">OpenSUSI MPW Users Layout</text>
+<text class="title" x="30" y="30">OpenSUSI MPW Users Layout Information</text>
 <text class="grid-label" x="130.0" y="55" text-anchor="middle">0</text>
 <text class="grid-label" x="270.0" y="55" text-anchor="middle">1</text>
 <text class="grid-label" x="410.0" y="55" text-anchor="middle">2</text>
