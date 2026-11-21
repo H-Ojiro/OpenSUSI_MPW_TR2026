@@ -116,7 +116,7 @@ def main():
     manifest = load_manifest(args.manifest)
     args.assets.mkdir(parents=True, exist_ok=True)
     tables = [generate_table(source, kind, manifest, args.assets,
-                            args.repo_owner, args.repo_name, args.branch, args.site_dir, base_url)
+                             args.repo_owner, args.repo_name, args.branch, args.site_dir, base_url)
               for source, kind in [('USERS.svg', 'users'), ('PREVIEW.svg', 'preview')]]
     args.site_dir.mkdir(parents=True, exist_ok=True)
     (args.site_dir / '.nojekyll').touch()
@@ -126,9 +126,11 @@ def main():
             '<style>body{font-family:Arial,sans-serif}table{border-collapse:collapse}'
             'td,th{padding:0;border:1px solid #555}td{line-height:0}img{display:block}</style>'
             '<body>' + '\n'.join(t.replace('### ' + t.splitlines()[0][4:],
-                                         '<h2>' + escape(t.splitlines()[0][4:]) + '</h2>', 1)
-                                  for t in tables) + '</body></html>')
+                                           '<h2>' + escape(t.splitlines()[0][4:]) + '</h2>', 1)
+                                 for t in tables) + '</body></html>')
     (args.site_dir / 'index.html').write_text(page, encoding='utf-8')
+
+    """
     section = START + '\n\n- Click an information tile to open its submission directory in this repository.\n- Click a layout snapshot to open its source repository.\n\n' + '\n\n'.join(tables) + '\n\n' + END
     readme = args.readme.read_text()
     if START in readme:
@@ -137,6 +139,7 @@ def main():
         start = readme.index('### Interactive Layout (SVG)')
         end = readme.index('\n---', readme.index('</table>', start))
     args.readme.write_text(readme[:start] + section + readme[end:])
+    """
 
 
 if __name__ == '__main__':
