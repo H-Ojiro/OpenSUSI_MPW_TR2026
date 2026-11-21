@@ -169,7 +169,7 @@ jobs:
           svg_marker = "![MPW Layout](./USERS.svg)"
           direct_link = (
               "[View USERS.svg directly](https://raw.githubusercontent.com/"
-              "H-Ojiro/OpenSUSI_MPW_TR2026/$TARGET_BRANCH/USERS.svg)"
+              "H-Ojiro/OpenSUSI_MPW_TR2026/main/USERS.svg)"
           )
           svg_end = readme.index(svg_marker) + len(svg_marker)
           first_divider = readme.index("\n---", svg_end)
