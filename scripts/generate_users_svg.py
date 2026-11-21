@@ -165,7 +165,7 @@ text { font-family: Arial, sans-serif; fill: black; }
 .tile-sub { font-size: 11px; }
 .tile-run { font-size: 10px; }
 </style>""",
-        f'<text class="title" x="{MARGIN}" y="{MARGIN}">OpenSUSI MPW Users Layout</text>',
+        f'<text class="title" x="{MARGIN}" y="{MARGIN}">OpenSUSI MPW Users Layout Information</text>',
     ]
 
     for col in range(grid_x):
