@@ -104,18 +104,12 @@ jobs:
           readme_path = Path("README.md")
           readme = readme_path.read_text(encoding="utf-8")
           svg_marker = "![MPW Layout](./USERS.svg)"
-          direct_link = (
-              "[View USERS.svg directly](https://raw.githubusercontent.com/"
-              "H-Ojiro/OpenSUSI_MPW_TR2026/main/USERS.svg)"
-          )
           svg_end = readme.index(svg_marker) + len(svg_marker)
           first_divider = readme.index("\n---", svg_end)
           second_divider = readme.index("\n---", first_divider + 1)
           table = Path("work/users_html_table.html").read_text(encoding="utf-8").rstrip()
 
           section = readme[svg_end:first_divider]
-          if direct_link not in section:
-              section = section.rstrip() + "\n\n" + direct_link + "\n"
 
           readme = (
               readme[:svg_end]
@@ -167,18 +161,12 @@ jobs:
           readme_path = Path("README.md")
           readme = readme_path.read_text(encoding="utf-8")
           svg_marker = "![MPW Layout](./USERS.svg)"
-          direct_link = (
-              "[View USERS.svg directly](https://raw.githubusercontent.com/"
-              "H-Ojiro/OpenSUSI_MPW_TR2026/main/USERS.svg)"
-          )
           svg_end = readme.index(svg_marker) + len(svg_marker)
           first_divider = readme.index("\n---", svg_end)
           second_divider = readme.index("\n---", first_divider + 1)
           table = Path("work/users_html_table.html").read_text(encoding="utf-8").rstrip()
 
           section = readme[svg_end:first_divider]
-          if direct_link not in section:
-              section = section.rstrip() + "\n\n" + direct_link + "\n"
 
           readme = (
               readme[:svg_end]
