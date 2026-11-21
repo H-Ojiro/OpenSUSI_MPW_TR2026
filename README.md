@@ -8,9 +8,7 @@ Below is the current user layout of the MPW shuttle.
 - Click an information tile to open its submission directory in this repository.
 - Click a layout snapshot to open its source repository.
 
-### Interactive Layout (SVG)
-
-Click each tile to open the corresponding Tapeout directory.
+### OpenSUSI MPW Users Layout
 
 [![MPW Layout](./USERS.svg)](https://opensusi.github.io/OpenSUSI_MPW_TR2026/)
 
