@@ -11,7 +11,7 @@ from pathlib import Path
 import klayout.db as kdb
 from PIL import Image, ImageDraw
 
-TILE_W, TILE_H = 140, 90
+TILE_W, TILE_H = 90, 90
 MARGIN, HEADER_H, ROW_LABEL_W = 30, 40, 30
 IMAGE_W, IMAGE_H = TILE_W, TILE_H
 TARGET_LAYER = (20, 0)
