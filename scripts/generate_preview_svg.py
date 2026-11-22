@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw
 
 TILE_W, TILE_H = 140, 90
 MARGIN, HEADER_H, ROW_LABEL_W = 30, 40, 30
-IMAGE_W, IMAGE_H = 128, 72
+IMAGE_W, IMAGE_H = TILE_W, TILE_H
 TARGET_LAYER = (20, 0)
 TARGET_COLOR = "#1d4f91"
 
@@ -48,7 +48,7 @@ def render_gds(gds_path: Path, top_name: str | None) -> str:
     draw = ImageDraw.Draw(image)
     width = max(1, bbox.width())
     height = max(1, bbox.height())
-    scale = min((IMAGE_W - 4) / width, (IMAGE_H - 4) / height)
+    scale = min(IMAGE_W / width, IMAGE_H / height)
     offset_x = (IMAGE_W - width * scale) / 2
     offset_y = (IMAGE_H - height * scale) / 2
 
@@ -99,7 +99,7 @@ def main() -> None:
     svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
         '<rect width="100%" height="100%" fill="white"/>',
-        '<style>text{font-family:Arial,sans-serif;fill:#111}.grid-label{font-size:12px}.tile{fill:#fff;stroke:#555;stroke-width:1}</style>',
+        '<style>text{font-family:Arial,sans-serif;fill:#111}.grid-label{font-size:12px}.tile{fill:none;stroke:#555;stroke-width:1}</style>',
         f'<text x="{MARGIN}" y="{MARGIN}" font-size="18" font-weight="bold">OpenSUSI MPW Layout Preview (Layer 20/0)</text>',
     ]
 
@@ -116,31 +116,23 @@ def main() -> None:
             x = ROW_LABEL_W + MARGIN + col * TILE_W
             y = HEADER_H + MARGIN + row * TILE_H
             entry = entries.get((col, row))
+            if entry:
+                gds_file = entry.get("gdsFile")
+                gds_path = Path(gds_file) if gds_file else None
+                if gds_path and gds_path.is_file():
+                    try:
+                        png = render_gds(gds_path, entry.get("gdsTopCell"))
+                    except Exception as error:
+                        print(f"Warning: could not render {gds_path}: {error}")
+                        png = ""
+
+                    if png:
+                        href = f"https://github.com/{args.repo_owner}/{args.repo_name}/tree/{args.branch}/{gds_path.parent.as_posix()}"
+                        svg.append(f'<a href="{escape(href, quote=True)}"><title>Tile ({col},{row}) — {escape(str(entry.get("gdsTopCell", "layout")))} (Layer 20/0)</title>')
+                        svg.append(f'<image x="{x}" y="{y}" width="{IMAGE_W}" height="{IMAGE_H}" preserveAspectRatio="none" href="data:image/png;base64,{png}"/>')
+                        svg.append("</a>")
+
             svg.append(f'<rect class="tile" x="{x}" y="{y}" width="{TILE_W}" height="{TILE_H}"/>')
-            if not entry:
-                continue
-
-            gds_file = entry.get("gdsFile")
-            if not gds_file:
-                continue
-
-            gds_path = Path(gds_file)
-            if not gds_path.is_file():
-                continue
-
-            try:
-                png = render_gds(gds_path, entry.get("gdsTopCell"))
-            except Exception as error:
-                print(f"Warning: could not render {gds_path}: {error}")
-                continue
-
-            if not png:
-                continue
-
-            href = f"https://github.com/{args.repo_owner}/{args.repo_name}/tree/{args.branch}/{gds_path.parent.as_posix()}"
-            svg.append(f'<a href="{escape(href, quote=True)}"><title>Tile ({col},{row}) — {escape(str(entry.get("gdsTopCell", "layout")))} (Layer 20/0)</title>')
-            svg.append(f'<image x="{x + 6}" y="{y + 9}" width="{IMAGE_W}" height="{IMAGE_H}" preserveAspectRatio="xMidYMid meet" href="data:image/png;base64,{png}"/>')
-            svg.append("</a>")
 
     svg.append("</svg>")
     args.output.write_text("\n".join(svg) + "\n", encoding="utf-8")
